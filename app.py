@@ -54,7 +54,7 @@ print("load client ...")
 
 @st.cache_resource
 def get_client():
-    chroma_client = chromadb.Client(Settings(chroma_db_impl="duckdb+parquet", persist_directory=persist_directory))
+    client = chromadb.PersistentClient(path=persist_directory)
     return chroma_client
 
 
@@ -77,7 +77,6 @@ client = get_client()
 
 print("client loaded...")
 # client.persist()
-
 
 
 with st.sidebar:
@@ -340,16 +339,19 @@ def search_collection(question):
         print("FINAL ANSWER: " + question_response)
         print("********************************************************************")
 
-    additional = "\n\r\n\r " \
-                 "----------------------------------- \n\r\n\r " \
+    additional = "<hr>" \
+                 "<p>" \
                  "I don't always get it right. This answer comes from reading the following pages, please " \
-                 "read them yourself, or contact the iMIS support team to make sure you have the right information.\n\r" \
-                 "Sources: \n\r"
+                 "read them yourself, or contact the iMIS support team to make sure you have the right information." \
+                 "<br>Sources:"
 
     for link in toplinks:
-        additional += "https://help.imis.com/enterprise/" + link + "\n\r"
-
-    question_response += additional
+        additional += "<br>https://help.imis.com/enterprise/" + link
+    
+    additional += "</p>"
+    
+    st.write(question_response)
+    st.write(additional, unsafe_allow_html=True)
 
     return question_response
 
@@ -732,5 +734,5 @@ if run_search or prompt != st.session_state['question']:
         print("search collection")
         answer = search_collection(prompt)
 
-    st.write(answer)
+    #st.write(answer)
 
