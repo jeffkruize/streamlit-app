@@ -3,7 +3,6 @@ import os, tempfile
 
 import streamlit as st
 from dotenv import load_dotenv
-from sentence_transformers import SentenceTransformer
 import re
 import chromadb
 from chromadb.config import Settings
@@ -44,7 +43,7 @@ footer {visibility: hidden;}
 )
 
 print("starting up ...")
-persist_directory = "./chromadb7"
+persist_directory = "./chromadb8"
 collection_name = "imis_docs"
 
 load_dotenv()
@@ -188,18 +187,18 @@ def search_collection(question):
             # where_document={"$contains": "search_string"}
         )
 
-    # print(results["documents"][0])
-    print(results["metadatas"][0])
+        # print(results["documents"][0])
+        print(results["metadatas"][0])
 
-    metadatas = results["metadatas"][0]
-    distances = results["distances"][0]
-    documents = results["documents"][0]
+        metadatas = results["metadatas"][0]
+        distances = results["distances"][0]
+        documents = results["documents"][0]
 
-    # print(distances)
-    answer_labels = []
-    file_names = []
-    line_names = []
-    answers = []
+        # print(distances)
+        answer_labels = []
+        file_names = []
+        line_names = []
+        answers = []
 
     with st.spinner("Combining texts ... "):
 
@@ -211,7 +210,7 @@ def search_collection(question):
             file_names.append(filename + ".txt")
             line_names.append(line)
             answer_labels.append(metas['label'])
-            answer = {"Label": metas['label'], "Section": metas['section'], "Distance": distances[i], "File": filename,
+            answer = {"Label": metas['label'], "Link": metas['link'], "Section": metas['section'], "Distance": distances[i], "File": filename,
                       "Line": line}
             answers.append(answer)
             # print(answer)
@@ -222,7 +221,6 @@ def search_collection(question):
         top3distance.append(answers[0])
         top3distance.append(answers[1])
         top3distance.append(answers[2])
-        top3distance.append(answers[4])
 
         sorted_labels = sort_by_most_common(answer_labels)
         unique_labels = list(dict.fromkeys(sorted_labels))
@@ -243,7 +241,7 @@ def search_collection(question):
                     filename = answer["File"]
                     break
 
-            articles.append({"Label": label, "Count": this_count, "Dist": "", "File": filename, "Line": ""})
+            articles.append({"Label": label, "Link": "", "Count": this_count, "Dist": "", "File": filename, "Line": ""})
             i += 1
 
         for answer in answers:
@@ -251,12 +249,12 @@ def search_collection(question):
                 if article["Label"] == answer["Label"]:
                     article["Dist"] += str(answer["Distance"]) + " "
                     article["Line"] += answer['Line'] + " "
+                    article["Link"] = answer['Link']
 
         top3counts = []
         top3counts.append(articles[0])
         top3counts.append(articles[1])
         top3counts.append(articles[2])
-        top3counts.append(articles[3])
 
         for top3 in top3counts:
             print(top3)
@@ -300,6 +298,7 @@ def search_collection(question):
         i = 0
 
         print('number of limits: ' + str(len(limits)))
+        toplinks = []
 
         for text in texts:
             # print("******************************************************************************************************")
@@ -316,6 +315,7 @@ def search_collection(question):
             # print("word count: " + str(wordcount))
 
             print(str(top_answers[i]['Label']))
+            toplinks.append(top_answers[i]['Link'])
 
             if wordcount > limits[i]:
                 text = get_max_text(lines, wordcount, text, distances, limits[i])
@@ -328,82 +328,30 @@ def search_collection(question):
 
         print("FULL TEMPLATE: \n" + full_template)
         print("********************************************************************")
-        final_question_template = get_final_question(question)
+
+        #final_question_template = get_final_question(question)
+        final_question_template = get_helpme_question(question)
         print("QUESTION TEMPLATE: \n" + final_question_template)
         print("********************************************************************")
 
-    with st.spinner("Getting final answer... "):
+    with st.spinner("Finding your answer... "):
         question_response = get_openai_response(system=full_template, question=final_question_template, temp=1)
 
         print("FINAL ANSWER: " + question_response)
         print("********************************************************************")
 
+    additional = "\n\r\n\r " \
+                 "----------------------------------- \n\r\n\r " \
+                 "I don't always get it right. This answer comes from reading the following pages, please " \
+                 "read them yourself, or contact the iMIS support team to make sure you have the right information.\n\r" \
+                 "Sources: \n\r"
+
+    for link in toplinks:
+        additional += "https://help.imis.com/enterprise/" + link + "\n\r"
+
+    question_response += additional
+
     return question_response
-
-
-def old_loops():
-    answer_texts.append(text)
-
-    if not answer_found:
-        # rating_system = get_rating_system(text, three_questions)
-        # rating_question = get_rating_question(question)
-
-        # question_response = get_openai_response(system=rating_system, question=rating_question, temp=0)
-        question_response = "RATING: NONE"
-        print("*******************************************")
-        print("openai rating: " + question_response)
-        question_response = str(question_response)
-
-        findcomplete = question_response.find("RATING: COMPLETE")
-        findgood = question_response.find("RATING: GOOD")
-        findpartial = question_response.find("RATING: PARTIAL")
-        findpoor = question_response.find("RATING: POOR")
-        findnone = question_response.find("RATING: NONE")
-
-        if findcomplete > -1:
-            ratings.append("COMPLETE")
-
-            answer_found = True
-            extracted_answer = extract_answer(question_response)
-            final_answer = extracted_answer
-            extracted_answers.append(extracted_answer)
-        elif findgood > -1:
-            ratings.append("GOOD")
-            extracted_answer = extract_answer(question_response)
-            extracted_answers.append(extracted_answer)
-        elif findpartial > -1:
-            ratings.append("GOOD")
-            extracted_answer = extract_answer(question_response)
-            extracted_answers.append(extracted_answer)
-        elif findpoor > -1:
-            ratings.append("POOR")
-            # extracted_answers.append("NONE")
-        elif findnone > -1:
-            ratings.append("NONE")
-            # extracted_answers.append("NONE")
-
-        if len(extracted_answers) == 3:
-            answer_found = True
-
-    # print("******************************************************************************************************")
-    i += 1
-
-    template = "The following articles are from the iMIS EMS documentation. \n"
-
-    if final_answer != "":
-        return final_answer
-    elif len(extracted_answers) > 0:
-        i = 0
-        for answer in extracted_answers:
-            rating = ratings[i]
-            topanswer = top_answers[i]
-
-            if rating == "GOOD":
-                template += "From Article: " + topanswer['Label'] + "\n"
-                template += answer + "\n"
-                template += "-----------------------------------------\n"
-
-            i += 1
 
 
 def extract_answer(answer_text):
@@ -700,6 +648,15 @@ def get_original_question(question):
     return template
 
 
+def get_helpme_question(question):
+    template = f"Help me find the answer to the question below, we are only allowed to use information from " \
+               f"the documentation given If the answer isn't in the articles, thats ok, its better to say I " \
+               f"can't find the answer then to give the wrong answer. " \
+               f"QUESTION: {question} \n" \
+               f"ANSWER: (maximum {answer_words} words)"
+
+    return template
+
 def get_final_question(question):
     template = f"Use the content from the articles provided to write an answer the question " \
                f"below. The answer is aimed at an iMIS EMS user and must be {style_guide}.  Make the answer " \
@@ -720,9 +677,6 @@ def get_question(question):
         answer = search_collection(question)
 
     st.write(answer)
-
-
-# get_question()
 
 
 def get_openai_response(system, question, temp=1, max_tokens=256):
@@ -779,14 +733,4 @@ if run_search or prompt != st.session_state['question']:
         answer = search_collection(prompt)
 
     st.write(answer)
-    # get_question(prompt)
 
-# get_question()
-# search_db()
-# load_text_file(103)
-# load_json_menu()
-# load_json_menu()
-
-# load_text_from_directory()
-
-# test_split_docs()
