@@ -54,7 +54,7 @@ print("load client ...")
 
 @st.cache_resource
 def get_client():
-    client = chromadb.PersistentClient(path=persist_directory)
+    chroma_client = chromadb.PersistentClient(path=persist_directory)
     return chroma_client
 
 
