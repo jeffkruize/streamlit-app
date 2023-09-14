@@ -27,7 +27,7 @@ st.set_page_config(
 st.markdown(
     """
 <style>
-.css-1544g2n {
+.css-10oheav {
     padding-top: 18px;
 }
 
@@ -298,6 +298,7 @@ def search_collection(question):
 
         print('number of limits: ' + str(len(limits)))
         toplinks = []
+        toplabels = []
 
         for text in texts:
             # print("******************************************************************************************************")
@@ -315,6 +316,7 @@ def search_collection(question):
 
             print(str(top_answers[i]['Label']))
             toplinks.append(top_answers[i]['Link'])
+            toplabels.append(top_answers[i]['Label'])
 
             if wordcount > limits[i]:
                 text = get_max_text(lines, wordcount, text, distances, limits[i])
@@ -345,8 +347,10 @@ def search_collection(question):
                  "read them yourself, or contact the iMIS support team to make sure you have the right information." \
                  "<br>Sources:"
 
+    i = 0
     for link in toplinks:
-        additional += "<br>https://help.imis.com/enterprise/" + link
+        additional += "<br><a href='https://help.imis.com/enterprise/" + link + "' target='_blank'>" + toplabels[i] + "</a>"
+        i += 1
     
     additional += "</p>"
     
@@ -653,7 +657,7 @@ def get_original_question(question):
 def get_helpme_question(question):
     template = f"Help me find the answer to the question below, we are only allowed to use information from " \
                f"the documentation given If the answer isn't in the articles, thats ok, its better to say I " \
-               f"can't find the answer then to give the wrong answer. " \
+               f"can't find the answer then to give the wrong answer.  Make the answer {style_guide}. \n" \
                f"QUESTION: {question} \n" \
                f"ANSWER: (maximum {answer_words} words)"
 
