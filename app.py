@@ -91,7 +91,7 @@ def get_embredding_function():
     return embedding_function
 
 
-def write_streamlit():
+def run_streamlit():
     with st.sidebar:
         st.title('QA with iMIS EMS')
         st.write('Proof of concept AI powered question answering app using the iMIS EMS documentation.')
@@ -773,5 +773,4 @@ answer_style = 'Professional'
 
 
 if check_password():
-    write_sidebar()
-    run_prompt()
+    run_streamlit()
