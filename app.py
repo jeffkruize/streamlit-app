@@ -43,24 +43,28 @@ footer {visibility: hidden;}
 )
 
 
-def startup():
 
-    print("starting up ...")
-    persist_directory = "./chromadb8"
-    collection_name = "imis_docs"
+print("starting up ...")
+persist_directory = "./chromadb8"
+collection_name = "imis_docs"    
     
-    load_dotenv()
-    openai.api_key = os.getenv('OPENAI_KEY')
+load_dotenv()
+openai.api_key = os.getenv('OPENAI_KEY')
     
-    print("load client ...")
+print("load client ...")
     
     
-    nlp = get_NLP()
-    embedding_function = get_embredding_function()
-    client = get_client()
+nlp = get_NLP()
+embedding_function = get_embredding_function()
+client = get_client()
     
-    print("client loaded...")
+print("client loaded...")
     # client.persist()
+
+answer_words = 150
+style_guide = ""
+answer_style = 'Professional'
+
 
 def check_password():
     """Returns `True` if the user had the correct password."""
@@ -123,7 +127,7 @@ def write_sidebar():
                  'functionality and hit Find Answer (or enter)...')
     
         answer_words = st.slider('Answer word length', 50, 250, 150, step=10)
-        answer_style = st.radio("Answer style", ["Friendly", "Direct", "Professional"])
+        answer_style = st.radio("Answer style", ["Professional", "Friendly", "Direct"])
     
     prompt = st.text_input("Ask me a question about iMIS EMS")
     run_search = st.button("Find Answer")
@@ -750,8 +754,8 @@ def get_openai_response(system, question, temp=1, max_tokens=256):
         print("openai error: " + str(e))
         return "ERROR"
 
+
 def run_prompt():
-    style_guide = ""
     
     if answer_style:
         if answer_style == 'Friendly':
