@@ -43,29 +43,6 @@ footer {visibility: hidden;}
 )
 
 
-
-print("starting up ...")
-persist_directory = "./chromadb8"
-collection_name = "imis_docs"    
-    
-load_dotenv()
-openai.api_key = os.getenv('OPENAI_KEY')
-    
-print("load client ...")
-    
-    
-nlp = get_NLP()
-embedding_function = get_embredding_function()
-client = get_client()
-    
-print("client loaded...")
-    # client.persist()
-
-answer_words = 150
-style_guide = ""
-answer_style = 'Professional'
-
-
 def check_password():
     """Returns `True` if the user had the correct password."""
 
@@ -777,6 +754,29 @@ def run_prompt():
             answer = search_collection(prompt)
     
         #st.write(answer)
+
+
+print("starting up ...")
+persist_directory = "./chromadb8"
+collection_name = "imis_docs"    
+    
+load_dotenv()
+openai.api_key = os.getenv('OPENAI_KEY')
+    
+print("load client ...")
+    
+    
+nlp = get_NLP()
+embedding_function = get_embredding_function()
+client = get_client()
+    
+print("client loaded...")
+    # client.persist()
+
+answer_words = 150
+style_guide = ""
+answer_style = 'Professional'
+
 
 if check_password():
     startup()
