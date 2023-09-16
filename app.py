@@ -42,11 +42,6 @@ footer {visibility: hidden;}
     unsafe_allow_html=True,
 )
 
-if check_password():
-    startup()
-    write_sidebar()
-    run_prompt()
-
 
 def startup():
 
@@ -779,3 +774,7 @@ def run_prompt():
     
         #st.write(answer)
 
+if check_password():
+    startup()
+    write_sidebar()
+    run_prompt()
