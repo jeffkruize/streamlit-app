@@ -779,6 +779,5 @@ answer_style = 'Professional'
 
 
 if check_password():
-    startup()
     write_sidebar()
     run_prompt()
