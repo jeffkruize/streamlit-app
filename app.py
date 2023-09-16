@@ -42,14 +42,30 @@ footer {visibility: hidden;}
     unsafe_allow_html=True,
 )
 
-print("starting up ...")
-persist_directory = "./chromadb8"
-collection_name = "imis_docs"
+if check_password():
+    startup()
+    write_sidebar()
+    run_prompt()
 
-load_dotenv()
-openai.api_key = os.getenv('OPENAI_KEY')
 
-print("load client ...")
+def startup():
+
+    print("starting up ...")
+    persist_directory = "./chromadb8"
+    collection_name = "imis_docs"
+    
+    load_dotenv()
+    openai.api_key = os.getenv('OPENAI_KEY')
+    
+    print("load client ...")
+    
+    
+    nlp = get_NLP()
+    embedding_function = get_embredding_function()
+    client = get_client()
+    
+    print("client loaded...")
+    # client.persist()
 
 
 @st.cache_resource
@@ -71,33 +87,28 @@ def get_embredding_function():
     return embedding_function
 
 
-nlp = get_NLP()
-embedding_function = get_embredding_function()
-client = get_client()
+def write_sidebar():
+    with st.sidebar:
+        st.title('QA with iMIS EMS')
+        st.write('Proof of concept AI powered question answering app using the iMIS EMS documentation.')
+    
+        st.write('This is a Retrieval Augmented Generation (RAG) system with a local vector store of '
+                 'content from https://help.imis.com/enterprise/. The vector store is returns sematic '
+                 'matches for questions given. These matches are filtered, combined and sent to a LLM to generate '
+                 'the final answer.')
+        st.write('This app does not have a memory, each question is answered independently. Ask a question about iMIS EMS '
+                 'functionality and hit Find Answer (or enter)...')
+    
+        answer_words = st.slider('Answer word length', 50, 250, 150, step=10)
+        answer_style = st.radio("Answer style", ["Friendly", "Direct", "Professional"])
+    
+    prompt = st.text_input("Ask me a question about iMIS EMS")
+    run_search = st.button("Find Answer")
+    
+    if 'question' not in st.session_state:
+        st.session_state['question'] = ''
 
-print("client loaded...")
-# client.persist()
 
-
-with st.sidebar:
-    st.title('QA with iMIS EMS')
-    st.write('Proof of concept AI powered question answering app using the iMIS EMS documentation.')
-
-    st.write('This is a Retrieval Augmented Generation (RAG) system with a local vector store of '
-             'content from https://help.imis.com/enterprise/. The vector store is returns sematic '
-             'matches for questions given. These matches are filtered, combined and sent to a LLM to generate '
-             'the final answer.')
-    st.write('This app does not have a memory, each question is answered independently. Ask a question about iMIS EMS '
-             'functionality and hit Find Answer (or enter)...')
-
-    answer_words = st.slider('Answer word length', 50, 250, 150, step=10)
-    answer_style = st.radio("Answer style", ["Friendly", "Direct", "Professional"])
-
-prompt = st.text_input("Ask me a question about iMIS EMS")
-run_search = st.button("Find Answer")
-
-if 'question' not in st.session_state:
-    st.session_state['question'] = ''
 
 @st.cache_resource
 def get_collection():
@@ -716,27 +727,27 @@ def get_openai_response(system, question, temp=1, max_tokens=256):
         print("openai error: " + str(e))
         return "ERROR"
 
-
-style_guide = ""
-
-if answer_style:
-    if answer_style == 'Friendly':
-        style_guide = 'friendly, warm and polite'
-    elif answer_style == 'Direct':
-        style_guide = 'blunt, cold and direct'
-    elif answer_style == 'Professional':
-        style_guide = 'professional, respectful and comprehensive'
-
-if run_search or prompt != st.session_state['question']:
-
-    st.session_state['question'] = prompt
-    answer = ""
-
-    if prompt == "quit":
-        exit()
-    elif len(prompt) > 6:
-        print("search collection")
-        answer = search_collection(prompt)
-
-    #st.write(answer)
+def run_prompt():
+    style_guide = ""
+    
+    if answer_style:
+        if answer_style == 'Friendly':
+            style_guide = 'friendly, warm and polite'
+        elif answer_style == 'Direct':
+            style_guide = 'blunt, cold and direct'
+        elif answer_style == 'Professional':
+            style_guide = 'professional, respectful and comprehensive'
+    
+    if run_search or prompt != st.session_state['question']:
+    
+        st.session_state['question'] = prompt
+        answer = ""
+    
+        if prompt == "quit":
+            exit()
+        elif len(prompt) > 6:
+            print("search collection")
+            answer = search_collection(prompt)
+    
+        #st.write(answer)
 
