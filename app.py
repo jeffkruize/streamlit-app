@@ -91,7 +91,7 @@ def get_embredding_function():
     return embedding_function
 
 
-def write_sidebar():
+def write_streamlit():
     with st.sidebar:
         st.title('QA with iMIS EMS')
         st.write('Proof of concept AI powered question answering app using the iMIS EMS documentation.')
@@ -112,6 +112,24 @@ def write_sidebar():
     if 'question' not in st.session_state:
         st.session_state['question'] = ''
 
+    if answer_style:
+        if answer_style == 'Friendly':
+            style_guide = 'friendly, warm and polite'
+        elif answer_style == 'Direct':
+            style_guide = 'blunt, cold and direct'
+        elif answer_style == 'Professional':
+            style_guide = 'professional, respectful and comprehensive'
+        
+    if run_search or prompt != st.session_state['question']:
+        
+        st.session_state['question'] = prompt
+        answer = ""
+        
+        if prompt == "quit":
+            exit()
+        elif len(prompt) > 6:
+            print("search collection")
+            answer = search_collection(prompt)
 
 
 @st.cache_resource
@@ -730,30 +748,6 @@ def get_openai_response(system, question, temp=1, max_tokens=256):
     except Exception as e:
         print("openai error: " + str(e))
         return "ERROR"
-
-
-def run_prompt():
-    
-    if answer_style:
-        if answer_style == 'Friendly':
-            style_guide = 'friendly, warm and polite'
-        elif answer_style == 'Direct':
-            style_guide = 'blunt, cold and direct'
-        elif answer_style == 'Professional':
-            style_guide = 'professional, respectful and comprehensive'
-    
-    if run_search or prompt != st.session_state['question']:
-    
-        st.session_state['question'] = prompt
-        answer = ""
-    
-        if prompt == "quit":
-            exit()
-        elif len(prompt) > 6:
-            print("search collection")
-            answer = search_collection(prompt)
-    
-        #st.write(answer)
 
 
 print("starting up ...")
