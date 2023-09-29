@@ -189,21 +189,15 @@ def reword_question(question):
 
 def search_collection(question):
     with st.spinner("Searching embeddings... "):
-
         collection = get_collection()
-
         # question = original_question(question)
-
         query_question = reword_question(question)
 
     with st.spinner("Calculating semantic distances... "):
-
         question = extract_original_question(query_question)
 
     with st.spinner("Extracting texts ... "):
-
         question_versions = extract_question_versions(query_question)
-
         print("original_question: " + question)
         print("question_versions: " + question_versions)
         # print("three questions: " + three_questions)
@@ -688,6 +682,9 @@ def get_original_question(question):
 
 
 def get_helpme_question(question):
+    global style_guide
+    global answer_words
+    
     template = f"Help me find the answer to the question below, we are only allowed to use information from " \
                f"the documentation given If the answer isn't in the articles, thats ok, its better to say I " \
                f"can't find the answer then to give the wrong answer.  Make the answer {style_guide}. \n" \
@@ -697,6 +694,9 @@ def get_helpme_question(question):
     return template
 
 def get_final_question(question):
+    global style_guide
+    global answer_words
+    
     template = f"Use the content from the articles provided to write an answer the question " \
                f"below. The answer is aimed at an iMIS EMS user and must be {style_guide}.  Make the answer " \
                f"maximum {answer_words} words. If the question asks for a method or steps, use numbered steps when " \
