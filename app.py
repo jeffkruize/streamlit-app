@@ -114,11 +114,11 @@ def run_streamlit():
 
     if answer_style:
         if answer_style == 'Friendly':
-            style_guide = 'friendly, warm and polite'
+            style_guide = 'friendly and polite'
         elif answer_style == 'Direct':
-            style_guide = 'blunt, cold and direct'
+            style_guide = 'blunt and direct'
         elif answer_style == 'Professional':
-            style_guide = 'professional, respectful and comprehensive'
+            style_guide = 'professional and comprehensive'
         
     if run_search or prompt != st.session_state['question']:
         
@@ -768,7 +768,7 @@ print("client loaded...")
     # client.persist()
 
 answer_words = 150
-style_guide = ""
+style_guide = "professional and respectful"
 answer_style = 'Professional'
 
 
